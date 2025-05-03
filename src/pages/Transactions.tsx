@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { transactionService, authService } from "@/services/api";
+import { transactionService } from "@/services/api";
 import Navbar from "@/components/Navbar";
 import TransactionTable from "@/components/TransactionTable";
 
@@ -29,13 +29,8 @@ const Transactions = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!authService.isAuthenticated()) {
-      navigate("/login");
-      return;
-    }
-    
     fetchTransactions();
-  }, [navigate, filters.page, filters.limit, filters.sort, filters.order]);
+  }, [filters.page, filters.limit, filters.sort, filters.order]);
 
   const fetchTransactions = async () => {
     setIsLoading(true);

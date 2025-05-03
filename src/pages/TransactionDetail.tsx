@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { transactionService, authService } from "@/services/api";
+import { transactionService } from "@/services/api";
 import Navbar from "@/components/Navbar";
 import PaymentStatusCard from "@/components/PaymentStatusCard";
 import { ArrowLeft } from "lucide-react";
@@ -15,11 +15,6 @@ const TransactionDetail = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!authService.isAuthenticated()) {
-      navigate("/login");
-      return;
-    }
-    
     const fetchTransaction = async () => {
       if (!id) return;
       
@@ -35,7 +30,7 @@ const TransactionDetail = () => {
     };
     
     fetchTransaction();
-  }, [id, navigate]);
+  }, [id]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -108,7 +103,7 @@ const TransactionDetail = () => {
                   <div>
                     <PaymentStatusCard 
                       collectRequestId={id || ""} 
-                      schoolId="your_school_id" // This would need to be populated with real data
+                      schoolId={transaction.school_id || "default_school_id"}
                       initialStatus={transaction.status}
                     />
                   </div>

@@ -68,6 +68,26 @@ export const authService = {
   }
 };
 
+// Create a public API instance for endpoints that don't require authentication
+const publicApi = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Add response interceptor to handle common errors for public API
+publicApi.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    const message = error.response?.data?.message || 'An error occurred';
+    toast.error(message);
+    return Promise.reject(error);
+  }
+);
+
 // Payment services
 export const paymentService = {
   createPayment: async (data: { 
@@ -83,7 +103,8 @@ export const paymentService = {
   },
   
   checkStatus: async (collect_request_id: string, school_id: string) => {
-    const response = await api.get(`/user/check-status/${collect_request_id}`, {
+    // Using publicApi so no auth token is required
+    const response = await publicApi.get(`/user/check-status/${collect_request_id}`, {
       params: { school_id }
     });
     return response.data;
@@ -98,17 +119,20 @@ export const transactionService = {
     sort?: string, 
     order?: 'asc' | 'desc' 
   }) => {
-    const response = await api.get('/user/transactions', { params });
+    // Using publicApi so no auth token is required
+    const response = await publicApi.get('/user/transactions', { params });
     return response.data;
   },
   
   getSchoolTransactions: async (schoolId: string) => {
-    const response = await api.get(`/user/transactions/school/${schoolId}`);
+    // Using publicApi so no auth token is required
+    const response = await publicApi.get(`/user/transactions/school/${schoolId}`);
     return response.data;
   },
   
   getTransactionStatus: async (orderId: string) => {
-    const response = await api.get(`/user/transaction-status/${orderId}`);
+    // Using publicApi so no auth token is required
+    const response = await publicApi.get(`/user/transaction-status/${orderId}`);
     return response.data;
   }
 };
