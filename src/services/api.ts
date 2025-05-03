@@ -70,7 +70,14 @@ export const authService = {
 
 // Payment services
 export const paymentService = {
-  createPayment: async (data: { school_id: string, amount: number, callback_url: string }) => {
+  createPayment: async (data: { 
+    school_id: string, 
+    trustee_id: string, 
+    student_info?: string, 
+    amount: number, 
+    callback_url: string, 
+    gateway: string 
+  }) => {
     const response = await api.post('/user/create-payment', data);
     return response.data;
   },

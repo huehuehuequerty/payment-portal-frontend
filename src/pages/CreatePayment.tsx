@@ -6,6 +6,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { paymentService, authService } from "@/services/api";
 import Navbar from "@/components/Navbar";
 import { useEffect } from "react";
@@ -13,8 +15,11 @@ import { useEffect } from "react";
 const CreatePayment = () => {
   const [formData, setFormData] = useState({
     school_id: "",
+    trustee_id: "",
+    student_info: "",
     amount: "",
     callback_url: `${window.location.origin}/payment-callback`,
+    gateway: "razorpay"
   });
   const [isLoading, setIsLoading] = useState(false);
   const [paymentLink, setPaymentLink] = useState("");
@@ -26,11 +31,18 @@ const CreatePayment = () => {
     }
   }, [navigate]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  const handleSelectChange = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      gateway: value,
     }));
   };
 
@@ -43,13 +55,29 @@ const CreatePayment = () => {
       
       if (isNaN(amount) || amount <= 0) {
         toast.error("Please enter a valid amount");
+        setIsLoading(false);
+        return;
+      }
+      
+      if (!formData.school_id) {
+        toast.error("School ID is required");
+        setIsLoading(false);
+        return;
+      }
+
+      if (!formData.trustee_id) {
+        toast.error("Trustee ID is required");
+        setIsLoading(false);
         return;
       }
       
       const data = {
         school_id: formData.school_id,
+        trustee_id: formData.trustee_id,
+        student_info: formData.student_info,
         amount,
         callback_url: formData.callback_url,
+        gateway: formData.gateway
       };
       
       const response = await paymentService.createPayment(data);
@@ -106,6 +134,28 @@ const CreatePayment = () => {
                   />
                 </div>
                 <div className="space-y-2">
+                  <Label htmlFor="trustee_id">Trustee ID</Label>
+                  <Input
+                    id="trustee_id"
+                    name="trustee_id"
+                    placeholder="Enter trustee ID"
+                    value={formData.trustee_id}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="student_info">Student Information</Label>
+                  <Textarea
+                    id="student_info"
+                    name="student_info"
+                    placeholder="Enter student information"
+                    value={formData.student_info}
+                    onChange={handleChange}
+                    className="min-h-[80px]"
+                  />
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor="amount">Amount (₹)</Label>
                   <Input
                     id="amount"
@@ -121,6 +171,23 @@ const CreatePayment = () => {
                   <p className="text-xs text-muted-foreground">
                     Enter the amount in Indian Rupees (INR)
                   </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="gateway">Payment Gateway</Label>
+                  <Select 
+                    value={formData.gateway} 
+                    onValueChange={handleSelectChange}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select payment gateway" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="razorpay">Razorpay</SelectItem>
+                      <SelectItem value="cashfree">Cashfree</SelectItem>
+                      <SelectItem value="paytm">Paytm</SelectItem>
+                      <SelectItem value="phonepe">PhonePe</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="callback_url">Callback URL</Label>
